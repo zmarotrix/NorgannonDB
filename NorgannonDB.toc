@@ -1,0 +1,30 @@
+## Interface: 16001
+## Title: NorgannonDB
+## Notes: Shared, addon-neutral game database: quests, NPCs, objects, items, loot, spawns, zones.
+## Author: Maro (data: Questie/QuestieDB and pfQuest projects)
+## Version: 1.1.0
+## X-Schema: 1.1
+## X-License: GPL-3.0
+## Category: Libraries
+## IconTexture: Interface\AddOns\NorgannonDB\media\icon
+
+core\api.lua
+data\info.lua
+data\world.lua
+data\quests.lua
+data\npcs.lua
+data\objects.lua
+data\items.lua
+data\variants.lua
+data\provenance.lua
+data\index.lua
+locales\deDE.lua
+locales\esES.lua
+locales\esMX.lua
+locales\frFR.lua
+locales\koKR.lua
+locales\ptBR.lua
+locales\ruRU.lua
+locales\zhCN.lua
+locales\zhTW.lua
+core\finalize.lua
