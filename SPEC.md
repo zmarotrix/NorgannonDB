@@ -1,4 +1,4 @@
-# NorgannonDB data specification — schema 1.2
+# NorgannonDB data specification — schema 1.3
 
 NorgannonDB is an addon-neutral game database: quests, NPCs, objects, items, loot, vendors,
 spawns, area triggers, zones, maps, factions and tracking categories. Any addon may read it.
@@ -26,7 +26,7 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 | `NorgannonDB:Peek(kind, id)` | *(1.1)* read-only view for bulk scans: a record not decoded yet comes back as a temporary copy and stays packed |
 | `NorgannonDB:PeekLocale(kind, id)` | *(1.1)* the same for the active locale's entry (§4) |
 
-Schema history: **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
+Schema history: **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
 
 ## 2. Conventions
 
@@ -174,6 +174,7 @@ What this means for consumers:
 | `maps.areaToUiMap[areaId]`, `maps.uiMapToArea[uiMapId]` | number | AreaTable <-> UiMap |
 | `maps.instanceToArea[instanceId]` | areaId | |
 | `dungeons[areaId]` | `{ name, altAreaIds, parent, entrances = { {areaId, x, y} } }` | |
+| `instances[key]` | see below | *(1.3)* every dungeon and raid, one record per wing |
 | `factionTemplates[id]` | number | reaction code (Questie encoding) |
 | `professions[skillId]` | string | enUS skill line name |
 | `categories[name]` | `{ npcs = {[id]=value}, objects = {[id]=value} }` | tracking lists, see below |
@@ -188,6 +189,29 @@ What this means for consumers:
 reaction code (`flight`, `innkeeper`, `vendor`, `repair`, `banker`, `auctioneer`,
 `stablemaster`, `battlemaster`, `spirithealer`, `mailbox`, `meetingstone`, `trainer`,
 `chests`).
+
+**Instances** *(1.3)* — keys such as `"deadmines"`, `"sm-cathedral"`, `"aq40"`. Facts are
+authored once (`tools/norgannondb/instances.py`); bosses' loot and the quests are found by the build.
+
+| Field | Shape | Meaning |
+|---|---|---|
+| `area` | areaId | the instance's area (its name comes from the client, localized); missing for WoW Forever instances not yet seen |
+| `name` | string | only when there is no area to name it |
+| `group`, `groupName`, `wing` | string | wings of one instance share a `group` (`"scarlet-monastery"`) and its `groupName`; `wing` is `"Graveyard"`, `"Upper"`, ... |
+| `size`, `raid` | number, `true` | group size; raids |
+| `levels` | `{ min, max }` | the recommended level range (the game's group finder ranges) |
+| `bossLevels` | `{ min, max }` | the bosses' levels (capped at 60) |
+| `entrance` | `{ area, x, y }` | where the entrance is, on the parent zone's map |
+| `keys` | {itemIds} | items that open the way (keys, the Scarlet Key, the Seal of Ascension, ...) |
+| `attunement` | string | English text, shown as is |
+| `bosses` | `{ { id = npcId, loot = {itemIds} }, ... }` | in their usual order; `loot` is the boss's own loot (gear and recipes few others drop, quest items only it drops), best chance first; the chances are in `npcs[id].drops` |
+| `quests` | {questIds} | quests filed under the instance, or about its creatures; for a wing, those about its bosses (or about no wing's) |
+| `forever` | `true` | an instance WoW Forever added; mostly learned by the Collector |
+| `note` | string | an authored remark |
+
+**Drop chances** *(1.3)*: where a creature's drop of an item had an unknown chance (0) and the
+creature rolls a reference loot table holding the item, the table's chance fills it in; a chance
+of 0 inside a table is an equal share of what its listed chances leave (cmangos's rule).
 
 ## 4. Localization — `NorgannonDB.locales[locale]`
 
