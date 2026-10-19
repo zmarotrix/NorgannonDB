@@ -7,6 +7,7 @@ because it contains data from QuestieDB, which is GPL-3.0.
 |---|---|---|
 | QuestieDB / Questie (https://github.com/Questie/Questie) | quests, NPCs, objects, items and their corrections; the source of truth | GPL-3.0 |
 | pfQuest by Shagu (https://github.com/shagu/pfQuest) | data that fills QuestieDB's gaps (drop chances, extra objectives, locales) | MIT, Copyright (c) 2017-2021 Eric Mauser (Shagu) |
+| DungeonJournal by Exehn (ForeverDungeonJournal 1.6.5) | WoW Forever's own instances (bosses, loot, quests, level ranges, entrances) and the loot WoW Forever added to classic dungeons | used with the author's permission (2026-10-19), on condition of this credit |
 | NorgannonDB Collector contributors | sightings and corrections recorded in game | contributed under the Collector's terms |
 
 Compiled and maintained by **Maro**. The generator (tools/norgannondb) lives in the suite
