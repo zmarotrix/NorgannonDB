@@ -81,6 +81,7 @@ What this means for consumers:
 | `objectives` | Objectives | see below |
 | `text` | `{ objectives = {lines}, description = string }` | enUS quest text (`$N`, `$C`, `$R`, `$B`, `$G` tokens kept) |
 | `sourceItem` | itemId | item handed out by the starter |
+| `startNote` | string | *(1.3)* where to pick it up, in English, when no starter is known (from DungeonJournal) |
 | `requiredItems` | {itemId} | items needed to start / that are not objectives |
 | `prerequisites` | `{ all = {questIds}, any = {questIds} }` | all of `all` and one of `any` must be complete |
 | `exclusiveTo` | {questIds} | completing/taking one of these locks this quest |
@@ -121,7 +122,7 @@ What this means for consumers:
 
 `text` and `icon` inside objective entries are optional overrides.
 
-**Rewards**: `{ xp = number, xpLevel = number, reputation = { {factionId, value}, ... }, items = {itemIds} }`.
+**Rewards**: `{ xp = number, xpLevel = number, reputation = { {factionId, value}, ... }, items = {itemIds}, choice = true }`. *(1.3)* `choice`: the items are a choice of one (known for some WoW Forever quests).
 `items` lists every item this quest can reward (fixed or choice).
 
 ### 3.2 `NorgannonDB.npcs[npcId]`
