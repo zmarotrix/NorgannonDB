@@ -1,9 +1,15 @@
 # NorgannonDB
 
+> [!WARNING]
+> **Very much a work in progress.** This is an early build for WoW Forever (client 1.60.1), in
+> active development and testing. Expect missing features, rough edges, bugs, and changes that
+> break things between versions. Bug reports and feedback are welcome in
+> [Issues](../../issues).
+
 An open, crowd-sourced game database for WoW Forever. It covers quests, NPCs, objects, items, loot,
 vendors, spawns, zones and tracking categories, in an add-on that any other add-on can load.
 
-- **Contract:** `SPEC.md` (schema 1.2), covering record shapes, coordinates, localization,
+- **Contract:** `SPEC.md` (schema 1.4), covering record shapes, coordinates, localization,
   player variants, corrections and the relation indexes.
 - **Sources:** QuestieDB is the source of truth, and pfQuest fills the gaps. Players add sightings
   with the NorgannonDB Collector.

@@ -1,7 +1,7 @@
 -- NorgannonDB public API. The data contract is documented in SPEC.md.
 -- This file loads first; data files fill the tables it creates, core/finalize.lua runs last.
 
-local SCHEMA_MAJOR, SCHEMA_MINOR = 1, 3
+local SCHEMA_MAJOR, SCHEMA_MINOR = 1, 4
 
 local DB = _G.NorgannonDB or {}
 _G.NorgannonDB = DB

@@ -1,4 +1,4 @@
-# NorgannonDB data specification — schema 1.3
+# NorgannonDB data specification — schema 1.4
 
 NorgannonDB is an addon-neutral game database: quests, NPCs, objects, items, loot, vendors,
 spawns, area triggers, zones, maps, factions and tracking categories. Any addon may read it.
@@ -26,7 +26,7 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 | `NorgannonDB:Peek(kind, id)` | *(1.1)* read-only view for bulk scans: a record not decoded yet comes back as a temporary copy and stays packed |
 | `NorgannonDB:PeekLocale(kind, id)` | *(1.1)* the same for the active locale's entry (§4) |
 
-Schema history: **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
+Schema history: **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
 
 ## 2. Conventions
 
@@ -176,6 +176,8 @@ What this means for consumers:
 | `maps.instanceToArea[instanceId]` | areaId | |
 | `dungeons[areaId]` | `{ name, altAreaIds, parent, entrances = { {areaId, x, y} } }` | |
 | `instances[key]` | see below | *(1.3)* every dungeon and raid, one record per wing |
+| `recipes[spellId]` | see below | *(1.4)* every crafting recipe |
+| `index.recipes` | `{ craftedBy = {[itemId] = {spellIds}}, reagentOf = {[itemId] = {spellIds}}, taughtBy = {[recipeItemId] = spellId}, disenchant = {[itemId] = {min, max, quality}} }` | *(1.4)* recipes by what they make and use, the recipe a recipe item teaches, and the item levels and qualities (2 uncommon, 3 rare, 4 epic) that disenchant into a material |
 | `factionTemplates[id]` | number | reaction code (Questie encoding) |
 | `professions[skillId]` | string | enUS skill line name |
 | `categories[name]` | `{ npcs = {[id]=value}, objects = {[id]=value} }` | tracking lists, see below |
@@ -209,6 +211,28 @@ authored once (`tools/norgannondb/instances.py`); bosses' loot and the quests ar
 | `quests` | {questIds} | quests filed under the instance, or about its creatures; for a wing, those about its bosses (or about no wing's) |
 | `forever` | `true` | an instance WoW Forever added; mostly learned by the Collector |
 | `note` | string | an authored remark |
+
+**Recipes** *(1.4)*, keyed by the recipe's spell id (its localized name is the spell's name):
+
+| Field | Shape | Meaning |
+|---|---|---|
+| `skill` | skill line id | the profession (`professions[skill]` names it) |
+| `name` | string | enUS name |
+| `levels` | `{ orange, yellow, green, grey }` | the skill where it turns each colour (grey: no more skill-ups) |
+| `learn` | number | the skill needed to learn it (trainer, or the recipe item's requirement) |
+| `item`, `count` | itemId, number | what it makes, and how many when not 1 (none for enchants) |
+| `reagents` | `{ {itemId, count}, ... }` | |
+| `trainers` | `{ [npcId] = copper }` | trainers who teach it, and their price |
+| `items` | {itemIds} | recipe items that teach it (their vendors, drops and quest rewards are in `items`) |
+| `quests` | {questIds} | quests that teach it |
+| `auto` | `true` | learned with the profession or as the skill rises |
+| `forever` | `true` | a recipe WoW Forever added (its sources come from the Collector) |
+
+The recipe list and skill ranges are WoW Forever's own (its client's SkillLineAbility and
+SpellEffect): recipes it retired are left out (the Alchemy healing potions, now First Aid's), and
+the recipes it added are in, with `forever = true`. A recipe added without reagents in the tables
+read takes the reagents of the classic recipe making the same item. Recipes with no known source
+and an unknown product are left out.
 
 **Drop chances** *(1.3)*: where a creature's drop of an item had an unknown chance (0) and the
 creature rolls a reference loot table holding the item, the table's chance fills it in; a chance
