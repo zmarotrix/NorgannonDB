@@ -281,7 +281,8 @@ NorgannonDB:RegisterCallback("CORRECTION_APPLIED", function(kind, id, owner) ...
 
 Corrections merge field by field (a field is replaced, never deep-merged).
 `NorgannonDB:GetProvenance(kind, id)` reports where a record came from: `"questie"`,
-`"pfquest"`, `"questie+pfquest"`, or the owner of the last correction.
+`"pfquest"`, `"questie+pfquest"`, `"collector"` (only players have seen it), or the owner of the
+last correction.
 
 ## 7. Sources and precedence
 
@@ -296,6 +297,8 @@ The data is compiled offline by `tools/norgannondb/build.py`:
    only adds chances. pfQuest's lists are used only where QuestieDB has none.
 4. Entities only pfQuest knows are kept and marked `"pfquest"` in provenance. Consumers decide
    whether to trust them (the pfQuest adapter skips pfQuest-only quests).
+5. **NorgannonDB Collector** findings from real play are added last. They add to a record and never
+   remove from it, and changing something QuestieDB provides takes repeated sightings.
 
 Because it includes QuestieDB data, the compiled database is distributed under **GPL-3.0**.
 

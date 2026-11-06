@@ -167,7 +167,7 @@ end
 -------------------------------------------------------------------------------------------
 
 local correctionOwners = {}
-local SOURCE_NAMES = { [1] = "questie", [2] = "pfquest", [3] = "questie+pfquest" }
+local SOURCE_NAMES = { [1] = "questie", [2] = "pfquest", [3] = "questie+pfquest", [4] = "collector" }
 
 ---Replace fields of one record; `fields` values of NorgannonDB.REMOVED delete a field.
 ---Creates the record when it does not exist yet.
