@@ -1,7 +1,7 @@
 -- NorgannonDB public API. The data contract is documented in SPEC.md.
 -- This file loads first; data files fill the tables it creates, core/finalize.lua runs last.
 
-local SCHEMA_MAJOR, SCHEMA_MINOR = 1, 4
+local SCHEMA_MAJOR, SCHEMA_MINOR = 1, 5
 
 local DB = _G.NorgannonDB or {}
 _G.NorgannonDB = DB
@@ -10,6 +10,7 @@ DB.schema = { major = SCHEMA_MAJOR, minor = SCHEMA_MINOR }
 DB.REMOVED = DB.REMOVED or setmetatable({}, { __tostring = function() return "NorgannonDB.REMOVED" end })
 
 DB.quests, DB.npcs, DB.objects, DB.items = DB.quests or {}, DB.npcs or {}, DB.objects or {}, DB.items or {}
+DB.training = DB.training or {}   -- 1.5: empty until players confirm a class (data/recipes.lua fills it)
 DB.locales = DB.locales or {}
 
 -------------------------------------------------------------------------------------------

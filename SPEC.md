@@ -1,4 +1,4 @@
-# NorgannonDB data specification — schema 1.4
+# NorgannonDB data specification — schema 1.5
 
 NorgannonDB is an addon-neutral game database: quests, NPCs, objects, items, loot, vendors,
 spawns, area triggers, zones, maps, factions and tracking categories. Any addon may read it.
@@ -26,7 +26,7 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 | `NorgannonDB:Peek(kind, id)` | *(1.1)* read-only view for bulk scans: a record not decoded yet comes back as a temporary copy and stays packed |
 | `NorgannonDB:PeekLocale(kind, id)` | *(1.1)* the same for the active locale's entry (§4) |
 
-Schema history: **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
+Schema history: **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
 
 ## 2. Conventions
 
@@ -177,6 +177,8 @@ What this means for consumers:
 | `dungeons[areaId]` | `{ name, altAreaIds, parent, entrances = { {areaId, x, y} } }` | |
 | `instances[key]` | see below | *(1.3)* every dungeon and raid, one record per wing |
 | `recipes[spellId]` | see below | *(1.4)* every crafting recipe |
+| `training[CLASS][spellId]` | see below | *(1.5)* what each class learns: from trainers, quests, books and levels |
+| `index.training[CLASS][level]` | {spellIds} | *(1.5)* the class's spells by the level they become learnable |
 | `index.recipes` | `{ craftedBy = {[itemId] = {spellIds}}, reagentOf = {[itemId] = {spellIds}}, taughtBy = {[recipeItemId] = spellId}, disenchant = {[itemId] = {min, max, quality}} }` | *(1.4)* recipes by what they make and use, the recipe a recipe item teaches, and the item levels and qualities (2 uncommon, 3 rare, 4 epic) that disenchant into a material |
 | `factionTemplates[id]` | number | reaction code (Questie encoding) |
 | `professions[skillId]` | string | enUS skill line name |
@@ -233,6 +235,23 @@ SpellEffect): recipes it retired are left out (the Alchemy healing potions, now 
 the recipes it added are in, with `forever = true`. A recipe added without reagents in the tables
 read takes the reagents of the classic recipe making the same item. Recipes with no known source
 and an unknown product are left out.
+
+**Training** *(1.5)*, keyed by the game's class token (`"MAGE"`, UnitClass's 2nd return) and the spell id:
+
+| Field | Shape | Meaning |
+|---|---|---|
+| `name`, `rank` | string, number | enUS name (the client's), and the rank the trainer shows |
+| `level` | number | the level it becomes learnable (or is learned, for `how = "level"`) |
+| `cost` | copper | the full price: trainers take 5-20% off for reputation, and the Collector works the full price back out |
+| `trainers` | {npcIds} | trainers seen teaching it (class and pet trainers) |
+| `needs` | {spellIds} | spells the trainer wants learned first (usually the previous rank) |
+| `pet` | `true` | taught by a pet trainer (hunter pets) |
+| `how`, `quest`, `item` | string, questId, itemId | learned away from a trainer: `"quest"` (the quest that teaches it), `"item"` (a book or tome), `"level"` (comes with the level) |
+
+Only what NorgannonDB Collector players saw is here, under the usual rules: the spell must be in the
+WoW Forever client, a new entry needs two players (or the maintainer), and a level or price that
+changes needs two players agreeing. A class with nothing seen yet has no entry. Profession trainers
+are in `recipes[spellId].trainers`.
 
 **Drop chances** *(1.3)*: where a creature's drop of an item had an unknown chance (0) and the
 creature rolls a reference loot table holding the item, the table's chance fills it in; a chance
