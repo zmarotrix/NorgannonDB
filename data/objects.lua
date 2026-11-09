@@ -10200,6 +10200,7 @@ R(423898,"Mysterious Book",[[drops={[215817]=0},questStarts={79950},spawns={[405
 R(423899,"Scrolls",[[drops={[215820]=0},questStarts={79951},spawns={[3]={{56.7,39.9}}},zone=3]])
 R(423900,"Waterlogged Book",[[drops={[215822]=0},questStarts={79952},spawns={[15]={{57.2,20.8}}},zone=15]])
 R(423901,"Book",[[drops={[215824]=0},questStarts={79953},spawns={[8]={{61.5,22.5}}}]])
+R(424002,"Kurzen Supply Crate",[[drops={[216617]=0},spawns={[33]={{49.57,7.74}}},zone=33]])
 R(424005,"Pocket Litter",[[questEnds={79192},questStarts={79980},spawns={[406]={{40.77,52.57}}},zone=406]])
 R(424006,"Hastily Rolled-Up Satchel",[[questEnds={79976},spawns={[45]={{22.48,24.2}}},zone=45]])
 R(424007,"Carved Figurine",[[questEnds={79974},questStarts={79975},spawns={[38]={{49.43,12.9}}},zone=38]])
