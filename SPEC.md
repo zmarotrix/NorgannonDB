@@ -246,7 +246,10 @@ and an unknown product are left out.
 | `trainers` | {npcIds} | trainers seen teaching it (class and pet trainers) |
 | `needs` | {spellIds} | spells the trainer wants learned first (usually the previous rank) |
 | `pet` | `true` | taught by a pet trainer (hunter pets) |
-| `how`, `quest`, `item` | string, questId, itemId | learned away from a trainer: `"quest"` (the quest that teaches it), `"item"` (a book or tome), `"level"` (comes with the level) |
+| `faction` | `"Alliance"` \| `"Horde"` | only that faction learns it (mage portals); absent means both |
+| `how` | string | learned away from a trainer: `"quest"`, `"item"` (a book or tome), `"level"` (comes with the level) |
+| `quests` | `{ [race] = questId }` | for `how = "quest"`: the quest that teaches it to each race (UnitRace's 2nd return, `"Orc"`) |
+| `item` | itemId | for `how = "item"`: the book or tome |
 
 Only what NorgannonDB Collector players saw is here, under the usual rules: the spell must be in the
 WoW Forever client, a new entry needs two players (or the maintainer), and a level or price that
