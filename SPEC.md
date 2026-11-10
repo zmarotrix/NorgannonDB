@@ -19,7 +19,7 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 
 | Field | Meaning |
 |---|---|
-| `NorgannonDB.schema` | `{ major = 1, minor = 2 }` |
+| `NorgannonDB.schema` | `{ major = 1, minor = 5 }` |
 | `NorgannonDB.info` | `{ flavor, interface, build, generated, sources = { {name, version, commit, license} } }` |
 | `NorgannonDB:RequireSchema(major, minMinor)` | `true` if this data can serve a consumer written for that version; otherwise `false, message` |
 | `NorgannonDB:Get(kind, id)` | *(1.1)* the record with every field decoded; same table as `NorgannonDB[kind][id]` |
@@ -319,7 +319,12 @@ The data is compiled offline by `tools/norgannondb/build.py`:
    only adds chances. pfQuest's lists are used only where QuestieDB has none.
 4. Entities only pfQuest knows are kept and marked `"pfquest"` in provenance. Consumers decide
    whether to trust them (the pfQuest adapter skips pfQuest-only quests).
-5. **NorgannonDB Collector** findings from real play are added last. They add to a record and never
+5. **DungeonJournal** by Exehn (used with the author's permission, credited) adds WoW Forever's own
+   instances (bosses, loot, quests, level ranges, entrances) and the loot WoW Forever added to classic
+   dungeons. It records no drop chances, so its links have chance 0 until another source knows better.
+6. **cmangos classic-db** (GPL-3.0) says which recipe each recipe item teaches, and what trainers teach,
+   for how much and at what skill.
+7. **NorgannonDB Collector** findings from real play are added last. They add to a record and never
    remove from it, and changing something QuestieDB provides takes repeated sightings.
 
 Because it includes QuestieDB data, the compiled database is distributed under **GPL-3.0**.
