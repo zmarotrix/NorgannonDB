@@ -3,7 +3,7 @@
 ## Category: NorgannonDB
 ## Notes: Shared, addon-neutral game database: quests, NPCs, objects, items, loot, spawns, zones, recipes.
 ## Author: Maro (data: Questie/QuestieDB and pfQuest projects)
-## Version: 1.4.7
+## Version: 1.4.8
 ## X-Schema: 1.1
 ## X-License: GPL-3.0
 ## IconTexture: Interface\AddOns\NorgannonDB\media\icon
