@@ -1,4 +1,4 @@
-# NorgannonDB data specification — schema 1.5
+# NorgannonDB data specification — schema 1.7
 
 NorgannonDB is an addon-neutral game database: quests, NPCs, objects, items, loot, vendors,
 spawns, area triggers, zones, maps, factions and tracking categories. Any addon may read it.
@@ -19,14 +19,14 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 
 | Field | Meaning |
 |---|---|
-| `NorgannonDB.schema` | `{ major = 1, minor = 5 }` |
+| `NorgannonDB.schema` | `{ major = 1, minor = 7 }` |
 | `NorgannonDB.info` | `{ flavor, interface, build, generated, sources = { {name, version, commit, license} } }` |
 | `NorgannonDB:RequireSchema(major, minMinor)` | `true` if this data can serve a consumer written for that version; otherwise `false, message` |
 | `NorgannonDB:Get(kind, id)` | *(1.1)* the record with every field decoded; same table as `NorgannonDB[kind][id]` |
 | `NorgannonDB:Peek(kind, id)` | *(1.1)* read-only view for bulk scans: a record not decoded yet comes back as a temporary copy and stays packed |
 | `NorgannonDB:PeekLocale(kind, id)` | *(1.1)* the same for the active locale's entry (§4) |
 
-Schema history: **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
+Schema history: **1.7** recipe `spec` (the crafting specialization a recipe needs) and `index.recipes.specs`. **1.6** quest `leadIn` and `shareable` (DungeonJournal's research on dungeon quests). **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
 
 ## 2. Conventions
 
@@ -89,6 +89,8 @@ What this means for consumers:
 | `childQuests` | {questIds} | quests this unlocks |
 | `nextQuestInChain`, `parentQuest` | questId | chain links |
 | `breadcrumbFor` / `breadcrumbs` | questId / {questIds} | optional lead-in quests |
+| `leadIn` | {questIds} | *(1.6)* the quests that must be done before this one is offered, in the order they are done, where DungeonJournal's research knows more than `prerequisites` (WoW Forever's own dungeon quests, mostly). It can name both sides' or classes' versions of a step: skip the ones the player can't take. Never gates availability by itself |
+| `shareable` | `false` | *(1.6)* can't be shared with party members: each player picks it up themselves (from DungeonJournal; absent means shareable or unknown) |
 | `availableStartingWith` | questId | becomes available while that quest is active or done |
 | `availableUntilCompleted` | questId | unavailable once that quest is done |
 | `disabledByQuest` | questId | unavailable while that quest is active |
@@ -179,7 +181,7 @@ What this means for consumers:
 | `recipes[spellId]` | see below | *(1.4)* every crafting recipe |
 | `training[CLASS][spellId]` | see below | *(1.5)* what each class learns: from trainers, quests, books and levels |
 | `index.training[CLASS][level]` | {spellIds} | *(1.5)* the class's spells by the level they become learnable |
-| `index.recipes` | `{ craftedBy = {[itemId] = {spellIds}}, reagentOf = {[itemId] = {spellIds}}, taughtBy = {[recipeItemId] = spellId}, disenchant = {[itemId] = {min, max, quality}} }` | *(1.4)* recipes by what they make and use, the recipe a recipe item teaches, and the item levels and qualities (2 uncommon, 3 rare, 4 epic) that disenchant into a material |
+| `index.recipes` | `{ craftedBy = {[itemId] = {spellIds}}, reagentOf = {[itemId] = {spellIds}}, taughtBy = {[recipeItemId] = spellId}, disenchant = {[itemId] = {min, max, quality}}, specs = {[specSpellId] = {name, skill, parent}} }` | *(1.4)* recipes by what they make and use, the recipe a recipe item teaches, and the item levels and qualities (2 uncommon, 3 rare, 4 epic) that disenchant into a material. *(1.7)* `specs`: the crafting specializations that have recipes, with their enUS spell name, profession and, for the Master smithing paths, the specialization they come under (Weaponsmith) |
 | `factionTemplates[id]` | number | reaction code (Questie encoding) |
 | `professions[skillId]` | string | enUS skill line name |
 | `categories[name]` | `{ npcs = {[id]=value}, objects = {[id]=value} }` | tracking lists, see below |
@@ -229,12 +231,19 @@ authored once (`tools/norgannondb/instances.py`); bosses' loot and the quests ar
 | `quests` | {questIds} | quests that teach it |
 | `auto` | `true` | learned with the profession or as the skill rises |
 | `forever` | `true` | a recipe WoW Forever added (its sources come from the Collector) |
+| `spec` | spellId | *(1.7)* the crafting specialization needed to learn it: Weaponsmith 9787, Armorsmith 9788, Master Swordsmith 17039, Master Hammersmith 17040, Master Axesmith 17041, Gnomish Engineering 20219, Goblin Engineering 20222, Dragonscale 10656, Elemental 10658 or Tribal Leatherworking 10660. Absent: anyone in the profession can learn it |
 
 The recipe list and skill ranges are WoW Forever's own (its client's SkillLineAbility and
 SpellEffect): recipes it retired are left out (the Alchemy healing potions, now First Aid's), and
 the recipes it added are in, with `forever = true`. A recipe added without reagents in the tables
 read takes the reagents of the classic recipe making the same item. Recipes with no known source
 and an unknown product are left out.
+
+`spec` *(1.7)* comes from the recipe item first: the client's item record names the spell it needs
+(exact). A recipe no item teaches gets one when every trainer who teaches it is that specialization's,
+by the trainer's title ("Armorsmith", "Master Goblin Engineer", ...), since the game doesn't say which
+spell a trainer asks for. A recipe item that needs no specialization wins over its trainers' titles
+(Forever sells some once trainer-only recipes, such as the Goblin Mining Helmet, to any engineer).
 
 **Training** *(1.5)*, keyed by the game's class token (`"MAGE"`, UnitClass's 2nd return) and the spell id:
 
