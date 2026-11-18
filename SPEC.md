@@ -1,4 +1,4 @@
-# NorgannonDB data specification — schema 1.7
+# NorgannonDB data specification — schema 1.8
 
 NorgannonDB is an addon-neutral game database: quests, NPCs, objects, items, loot, vendors,
 spawns, area triggers, zones, maps, factions and tracking categories. Any addon may read it.
@@ -19,14 +19,14 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 
 | Field | Meaning |
 |---|---|
-| `NorgannonDB.schema` | `{ major = 1, minor = 7 }` |
+| `NorgannonDB.schema` | `{ major = 1, minor = 8 }` |
 | `NorgannonDB.info` | `{ flavor, interface, build, generated, sources = { {name, version, commit, license} } }` |
 | `NorgannonDB:RequireSchema(major, minMinor)` | `true` if this data can serve a consumer written for that version; otherwise `false, message` |
 | `NorgannonDB:Get(kind, id)` | *(1.1)* the record with every field decoded; same table as `NorgannonDB[kind][id]` |
 | `NorgannonDB:Peek(kind, id)` | *(1.1)* read-only view for bulk scans: a record not decoded yet comes back as a temporary copy and stays packed |
 | `NorgannonDB:PeekLocale(kind, id)` | *(1.1)* the same for the active locale's entry (§4) |
 
-Schema history: **1.7** recipe `spec` (the crafting specialization a recipe needs) and `index.recipes.specs`. **1.6** quest `leadIn` and `shareable` (DungeonJournal's research on dungeon quests). **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
+Schema history: **1.8** item `pvpRank`, `repFaction`, `repStanding` and `side` (what an item needs: an honor rank, a reputation standing, one side) and `index.rewards`. **1.7** recipe `spec` (the crafting specialization a recipe needs) and `index.recipes.specs`. **1.6** quest `leadIn` and `shareable` (DungeonJournal's research on dungeon quests). **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
 
 ## 2. Conventions
 
@@ -164,6 +164,9 @@ What this means for consumers:
 | `rewardOf` | {questIds} | quests that reward it |
 | `drops` | `{ npcs = {[npcId]=chance}, objects = {[objectId]=chance}, items = {[containerItemId]=chance}, lootTables = {[tableId]=chance} }` | where it comes from |
 | `vendors` | `{ [npcId] = count }` | who sells it (0 = unlimited/unknown) |
+| `pvpRank` | number | *(1.8)* the honor rank needed to buy or use it: 1 (Private / Scout) to 14 (Grand Marshal / High Warlord). `UnitPVPRank` and `GetPVPRankInfo` number ranks 4 higher (5 = Private) |
+| `repFaction`, `repStanding` | factionId, number | *(1.8)* the faction and standing needed: 3 Neutral, 4 Friendly, 5 Honored, 6 Revered, 7 Exalted (`GetFactionInfoByID`'s standingID is 1 higher) |
+| `side` | `"A"` / `"H"` | *(1.8)* only that side can get it: PvP gear by its rank title or its quartermasters, reputation rewards by the faction they come under |
 
 `npcs[].drops`, `objects[].drops` and `npcs[].sells` are the same data indexed the other way.
 
@@ -182,6 +185,7 @@ What this means for consumers:
 | `training[CLASS][spellId]` | see below | *(1.5)* what each class learns: from trainers, quests, books and levels |
 | `index.training[CLASS][level]` | {spellIds} | *(1.5)* the class's spells by the level they become learnable |
 | `index.recipes` | `{ craftedBy = {[itemId] = {spellIds}}, reagentOf = {[itemId] = {spellIds}}, taughtBy = {[recipeItemId] = spellId}, disenchant = {[itemId] = {min, max, quality}}, specs = {[specSpellId] = {name, skill, parent}} }` | *(1.4)* recipes by what they make and use, the recipe a recipe item teaches, and the item levels and qualities (2 uncommon, 3 rare, 4 epic) that disenchant into a material. *(1.7)* `specs`: the crafting specializations that have recipes, with their enUS spell name, profession and, for the Master smithing paths, the specialization they come under (Weaponsmith) |
+| `index.rewards` | `{ pvp = {[rank] = {itemIds}}, factions = {[factionId] = {name, parent, parentName, side, items = {[standing] = {itemIds}}}} }` | *(1.8)* PvP and reputation rewards to browse: the items each honor rank opens up (both sides; an item's `side` tells them apart), and each faction's by standing. Standing `0`: the battleground factions' rewards (Stormpike Guard, Frostwolf Clan, Warsong Outriders, Silverwing Sentinels), listed by their supply officers, whose standing the game's item data doesn't record. Reputation rewards nothing is known to sell yet (WoW Forever's own factions) are listed too; PvP gear nothing sells (the ranks' retired pieces) isn't |
 | `factionTemplates[id]` | number | reaction code (Questie encoding) |
 | `professions[skillId]` | string | enUS skill line name |
 | `categories[name]` | `{ npcs = {[id]=value}, objects = {[id]=value} }` | tracking lists, see below |
