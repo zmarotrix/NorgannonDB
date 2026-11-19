@@ -1,4 +1,4 @@
-# NorgannonDB data specification — schema 1.8
+# NorgannonDB data specification — schema 1.9
 
 NorgannonDB is an addon-neutral game database: quests, NPCs, objects, items, loot, vendors,
 spawns, area triggers, zones, maps, factions and tracking categories. Any addon may read it.
@@ -19,14 +19,14 @@ if not DB or not DB:RequireSchema(1, 1) then return end   -- major 1, at least m
 
 | Field | Meaning |
 |---|---|
-| `NorgannonDB.schema` | `{ major = 1, minor = 8 }` |
+| `NorgannonDB.schema` | `{ major = 1, minor = 9 }` |
 | `NorgannonDB.info` | `{ flavor, interface, build, generated, sources = { {name, version, commit, license} } }` |
 | `NorgannonDB:RequireSchema(major, minMinor)` | `true` if this data can serve a consumer written for that version; otherwise `false, message` |
 | `NorgannonDB:Get(kind, id)` | *(1.1)* the record with every field decoded; same table as `NorgannonDB[kind][id]` |
 | `NorgannonDB:Peek(kind, id)` | *(1.1)* read-only view for bulk scans: a record not decoded yet comes back as a temporary copy and stays packed |
 | `NorgannonDB:PeekLocale(kind, id)` | *(1.1)* the same for the active locale's entry (§4) |
 
-Schema history: **1.8** item `pvpRank`, `repFaction`, `repStanding` and `side` (what an item needs: an honor rank, a reputation standing, one side) and `index.rewards`. **1.7** recipe `spec` (the crafting specialization a recipe needs) and `index.recipes.specs`. **1.6** quest `leadIn` and `shareable` (DungeonJournal's research on dungeon quests). **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
+Schema history: **1.9** quest `rewards.xpConfirmed`, and `rewards.xp` is WoW Forever's figure where the game has given it (see Rewards in §3.1). **1.8** item `pvpRank`, `repFaction`, `repStanding` and `side` (what an item needs: an honor rank, a reputation standing, one side) and `index.rewards`. **1.7** recipe `spec` (the crafting specialization a recipe needs) and `index.recipes.specs`. **1.6** quest `leadIn` and `shareable` (DungeonJournal's research on dungeon quests). **1.5** `training` (what each class learns, at which level, for how much and from whom) and `index.training`. **1.4** `recipes` (every crafting recipe: skill-up colours, product, reagents, where it is learned) and `index.recipes`. **1.3** `instances` (dungeons and raids, with wings, bosses in order, each boss's own loot and the quests for them), reference loot table chances filled into `drops`. **1.2** quest `hidden` / `hiddenReason`, the `index` tables (hidden quests are left out of them). **1.1** packed records (§2 "Packed records"), `Get`, `Peek`, `PeekLocale`.
 
 ## 2. Conventions
 
@@ -124,7 +124,8 @@ What this means for consumers:
 
 `text` and `icon` inside objective entries are optional overrides.
 
-**Rewards**: `{ xp = number, xpLevel = number, reputation = { {factionId, value}, ... }, items = {itemIds}, choice = true }`. *(1.3)* `choice`: the items are a choice of one (known for some WoW Forever quests).
+**Rewards**: `{ xp = number, xpLevel = number, xpConfirmed = true, reputation = { {factionId, value}, ... }, items = {itemIds}, choice = true }`. *(1.3)* `choice`: the items are a choice of one (known for some WoW Forever quests).
+`xp` is the full XP the quest pays, rounded the way the server rounds it. A player more than five levels above `xpLevel` gets less: 80% at six levels above, 60% at seven, 50% from eight on (taken before rounding, so a share of `xp` can be one rounding step off). *(1.9)* `xpConfirmed`: `xp` is the game's own figure, read from the client's quest cache. WoW Forever multiplies many quests' XP (dungeon quests above all, mostly by x1.75 to x2.675), so without `xpConfirmed`, `xp` is Classic's figure from QuestieDB: right for a quest Forever doesn't multiply, short for one it does. `xpConfirmed` with no `xp`: the quest pays no XP.
 `items` lists every item this quest can reward (fixed or choice).
 
 ### 3.2 `NorgannonDB.npcs[npcId]`
